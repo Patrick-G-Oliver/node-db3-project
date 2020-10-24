@@ -1,26 +1,42 @@
 const db = require("../data/config");
 
+// streamlined TL-example-file version
 function find() {
-    return db("schemes as s")
-        .select("s.scheme_name")
+    return db("schemes")
+        .select("scheme_name")
+}
+
+// verbose guided-project-style version
+// function find() {
+//     return db("schemes as s")
+//         .select("s.scheme_name")
+// }
+
 /* 
 translates to:
 SELECT *
 FROM schemes;
 */
+
+// streamlined TL-example-file version
+function findById(id) {
+    return db("schemes")
+        .where({ id })
 }
 
-function findById(id) {
-    return db("schemes as s")
-        .where("s.id", id)
-        .select("s.scheme_name")
+// verbose guided-project-style version
+// function findById(id) {
+//     return db("schemes as s")
+//         .where("s.id", id)
+//         .select("s.scheme_name")
+// }
+
 /*
 translates to:
 SELECT scheme_name
 FROM schemes
 WHERE schemes.id = ?;
 */
-}
 
 function findSteps(id) {
     return db("steps")
@@ -43,10 +59,14 @@ WHERE steps.scheme_id = ?;
 //         .select("st.id", "st.instructions", "sc.scheme_name")
 // }
 
-// only resolves to id of added scheme?
 function add(scheme) {
     return db("schemes")
         .insert(scheme)
+        // here, .then returns the newly-inserted scheme w/ id (per MVP)
+        .then(ids => {
+            const [id] = ids;
+            return findById(id)
+        })
 }
 
 // 
@@ -57,17 +77,25 @@ function add(scheme) {
 // }
 
 function update(changes, id) {
-    return db("schemes as s")
+    return db("schemes")
         .where({ id })
         .update(changes)
 }
 
 // pending: resolved to removed scheme, resolves to null on an invalid id (already does?)
+// streamlined TL-example-file version
 function remove(id) {
-    return db("schemes as s")
-        .where("s.id", id)
-        .del("scheme")
+    return db("schemes")
+        .where({ id })
+        .del()
 }
+
+// verbose guided-project-style version
+// function remove(id) {
+//     return db("schemes as s")
+//         .where("s.id", id)
+//         .del("scheme")
+// }
 
 module.exports = {
     find,
